@@ -1,4 +1,4 @@
-# DG-YOLO
+# Joint Bilateral Learning
 
 This repository is an unofficial implementation in PyTorch for the paper:
 
