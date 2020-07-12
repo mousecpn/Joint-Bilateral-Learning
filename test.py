@@ -39,10 +39,10 @@ def test(args):
     low_cont = low_cont.to(device)
     low_style = low_style.to(device)
     model.eval()
-    cont_feat = net.encode_with_intermediate(low_cont)
-    style_feat = net.encode_with_intermediate(low_style)
+    cont_feat = net.encode_with_intermediate(low_cont.unsqueeze(0))
+    style_feat = net.encode_with_intermediate(low_style.unsqueeze(0))
 
-    coeffs, output = model(cont_img, cont_feat, style_feat)
+    coeffs, output = model(cont_img.unsqueeze(0), cont_feat, style_feat)
 
     save_image(output, output_file + 'output.jpg', normalize=True)
     return

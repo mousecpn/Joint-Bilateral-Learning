@@ -144,6 +144,27 @@ class LaplacianRegularizer(nn.Module):
                 loss += self.mse_loss(term,f[:,:,up:down+1,left:right+1])
         return loss
 
+# true laplacian_regularizer of original paper, input weight is coeffs in 5-dimension form
+def calc_laplacian_regularizer_loss(self, weights, l1=0.0, l2=0.0):
+        if not l1 and not l2:
+            return 0.0
+        diff1 = weights[:, :, 1:, :, :] - weights[:, :, :-1, :, :]
+        diff2 = weights[:, :, :, 1:, :] - weights[:, :, :, :-1, :]
+        diff3 = weights[:, :, :, :, 1:] - weights[:, :, :, :, :-1]
+        if l1:
+            result1 = torch.abs(diff1).sum()
+            result1 += torch.abs(diff2).sum()
+            result1 += torch.abs(diff3).sum()
+        if l2:
+            result2 = torch.pow(diff1, 2).sum()
+            result2 += torch.pow(diff2, 2).sum()
+            result2 += torch.pow(diff3, 2).sum()
+        if l1 and not l2:
+            return result1
+        elif not l1 and l2:
+            return result2
+        else:
+            return result1 + result2
 
 class Slice(nn.Module):
     def __init__(self):
