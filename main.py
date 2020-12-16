@@ -48,7 +48,7 @@ def train(args):
 
     model = Model().to(device)
     optimizer = Adam(model.parameters(), lr=1e-4)
-    L_loss = LaplacianRegularizer()
+    L_loss = LaplacianRegularizer3D()
     epochs = 100
     batch_done = 0
     # training iteration
