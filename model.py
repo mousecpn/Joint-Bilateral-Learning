@@ -128,7 +128,7 @@ class SplattingBlock(nn.Module):
         c = F.relu(self.conv2(c))
         return c,s
 
-class LaplacianRegularizer(nn.Module):
+class LaplacianRegularizer2D(nn.Module):
     def __init__(self):
         super(LaplacianRegularizer, self).__init__()
         self.mse_loss = torch.nn.MSELoss(reduction='sum')
@@ -142,6 +142,29 @@ class LaplacianRegularizer(nn.Module):
                 right = min(j+1,f.shape[3] - 1)
                 term = f[:,:,i,j].view(f.shape[0],f.shape[1],1,1).expand(f.shape[0],f.shape[1],down - up+1,right-left+1)
                 loss += self.mse_loss(term,f[:,:,up:down+1,left:right+1])
+        return loss
+
+class LaplacianRegularizer3D(nn.Module):
+    def __init__(self):
+        super(LaplacianRegularizer3D, self).__init__()
+        self.mse_loss = torch.nn.MSELoss(reduction='sum')
+
+    def forward(self, f):
+        loss = 0.
+        # f: [B, 12, 8, H, W]
+        f = f.reshape(f.shape[0],12,8,f.shape[2],f.shape[-1])
+        B, C, D, H, W = f.shape
+        for k in range(D):
+            for i in range(H):
+                for j in range(W):
+                    front = max(k - 1, 0)
+                    back = min(k + 1, D - 1)
+                    up = max(i - 1, 0)
+                    down = min(i + 1, H - 1)
+                    left = max(j - 1, 0)
+                    right = min(j + 1, W - 1)
+                    term = f[:, :, k, i, j].view(B, C, 1, 1, 1).expand(B, C, back - front + 1, down - up + 1, right - left + 1)
+                    loss += self.mse_loss(term, f[:, :, front:back + 1, up:down + 1, left:right + 1])
         return loss
 
 # true laplacian_regularizer of original paper, input weight is coeffs in 5-dimension form
